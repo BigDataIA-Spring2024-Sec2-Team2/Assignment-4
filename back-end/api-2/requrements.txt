@@ -1,0 +1,4 @@
+snowflake-connector-python
+fastapi
+uvicorn
+pip install python-jose
