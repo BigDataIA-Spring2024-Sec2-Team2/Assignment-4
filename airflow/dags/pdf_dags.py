@@ -4,7 +4,8 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 from datetime import timedelta
-from dags.scripts.demp import print_keys
+from dags.scripts.extraction_pypdf import process_pdf
+from dags.scripts.validate import cleanDataPDF
 
 dag = DAG(
     dag_id="pdf_dag",
@@ -14,29 +15,42 @@ dag = DAG(
     dagrun_timeout=timedelta(minutes=60),
 )
 
+def extract_data(**kwargs):
+    s3_uri = kwargs['dag_run'].conf.get("s3_uri")
+    csv_s3_uri = process_pdf(s3_uri)
+    kwargs['ti'].xcom_push(key='raw_data_pdf', value=csv_s3_uri)
+
+def validate_data(**kwargs):
+    pulled_value = kwargs['ti'].xcom_pull(dag_id='pdf_dag', task_ids='extract_data', key='raw_data_pdf')
+    print(pulled_value)
+    csv_s3_uri = cleanDataPDF(pulled_value)
+    kwargs['ti'].xcom_push(key='clean_data_pdf', value=csv_s3_uri)
+    
+
+def load_data(**kwargs):
+    pulled_value = kwargs['ti'].xcom_pull(dag_id='pdf_dag', task_ids='validate_data', key='clean_data_pdf')
+    print(pulled_value)
 
 with dag:
-    hello_world = BashOperator(
-        task_id="hello_world",
-        bash_command='echo "Hello from airflow"'
-    )
-
-    fetch_keys = PythonOperator(
-        task_id='fetch_keys',
-        python_callable=print_keys,
+    extract_data_task = PythonOperator(
+        task_id='extract_data',
+        python_callable=extract_data,
         provide_context=True,
         dag=dag,
     )
 
-    bye_world = BashOperator(
-        task_id="bye_world",
-        bash_command='echo "Bye from airflow"'
+    validate_data_task = PythonOperator(
+        task_id='validate_data',
+        python_callable=validate_data,
+        provide_context=True,
+        dag=dag,
     )
     
-    bye_world_2 = BashOperator(
-        task_id="bye_worlds",
-        bash_command='echo "Bye from airflow 2"'
+    load_data_task = PythonOperator(
+        task_id='load_data',
+        python_callable=load_data,
+        provide_context=True,
+        dag=dag,
     )
 
-    hello_world >> fetch_keys >> bye_world >> bye_world_2
-    
+    extract_data_task >> validate_data_task >> load_data_task
