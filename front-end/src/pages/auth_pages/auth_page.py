@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-from auth_pages.signup import sign_up
-from auth_pages.login import login
+from pages.auth_pages.signup import sign_up
+from pages.auth_pages.login import login
 
 
 def menu_login():

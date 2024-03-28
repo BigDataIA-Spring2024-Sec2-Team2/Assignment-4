@@ -2,7 +2,7 @@ import streamlit as st
 import re
 
 def sign_up():
-  with st.form(key='signup', clear_on_submit=False):
+  with st.form(key='signup', clear_on_submit=True):
     st.subheader(':red[Sign Up]')
     email = st.text_input(':blue[Email]', placeholder='Enter Your Email')
     username = st.text_input(':blue[Username]', placeholder='Enter Your Username')
@@ -15,6 +15,7 @@ def sign_up():
 
     if sub:
       if validate_email(email) and validate_username(username) and validate_password(password1, password2):
+        # TODO call the create new user service
         pass
 
 def validate_email(email):
