@@ -150,9 +150,6 @@ CodeLab - [Documentation](https://docs.google.com/document/d/1YvvKu38ZeIrlWY-Pgl
 - https://app.snowflake.com/
 - https://www.sqlalchemy.org/
 
-
-  ## Team Information 
-  Project Board - 
   
   Name | Contribution %| Contributions |
   --- |--- | --- |
