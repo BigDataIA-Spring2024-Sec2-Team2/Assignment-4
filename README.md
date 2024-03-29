@@ -129,7 +129,7 @@ Dockerize API services and streamlit application.
      database = "",
      schema = ""
  
-  - Airflow:
+   - Airflow:
     airflow_un = "",
     airflow_pas = ""
 5. Create code env and activate it.
