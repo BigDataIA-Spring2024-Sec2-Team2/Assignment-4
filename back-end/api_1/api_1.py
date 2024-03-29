@@ -11,64 +11,61 @@ import magic
 import uvicorn
 import os
 from dotenv import load_dotenv
+from pymongo import MongoClient
+import pymongo
+import urllib
+import certifi
+from m_database import User_token
 
 load_dotenv()
+
+mongo_username = os.getenv('mongo_username')
+mongo_password = os.getenv('mongo_password')
+mongo_cluster = os.getenv('mongo_cluster')
+
+mongo_url = f'mongodb+srv://{urllib.parse.quote_plus(mongo_username)}:{urllib.parse.quote_plus(mongo_password)}@{mongo_cluster}/?retryWrites=true&w=majority'
 
 session = boto3.Session(
     aws_access_key_id= os.getenv("aws_access_key_id"),
     aws_secret_access_key= os.getenv("aws_secret_access_key")
 )
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+def print_tokens_in_db():
+    tokens_from_mongo = list(User_token.find())
+    # print("Number of tokens in the database:", len(tokens_from_mongo))
+    # print("Tokens in the database:")
+    users_and_tokens=[]
+    for each in tokens_from_mongo:
+        temp=[]
+        user=each['email']
+        token=each['token']
+        temp.append(user)
+        temp.append(token)
+        users_and_tokens.append(temp)
+    return users_and_tokens
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+users_and_tokens = print_tokens_in_db()
 
 file_details=[]
 
 app = FastAPI() 
 
-def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm="HS256")
-    return encoded_jwt
-
-
-def decode_token(token: str):
-    try:
-        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
-        return payload
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-
-def authenticate_user(username: str, password: str):
-    if username == "admin" and password == "password":
-        return True
-    return False
-
-token=""
-user_name=""
-
-@app.post("/token")
-async def login_for_access_token(username: str, password: str):
-    if not authenticate_user(username, password):
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": username}, expires_delta=access_token_expires)
-    global token, user_name
-    token = access_token
-    user_name = username
-    return {"access_token": access_token, "token_type": "bearer"}
+supported_file_types={
+    'application/pdf': 'pdf'
+}
 
 AWS_Bucket = 'file-storage-assignment-4'
 s3 = boto3.resource('s3')
 bucket = s3.Bucket(AWS_Bucket)
 
-supported_file_types={
-    'application/pdf': 'pdf'
-}
+def check_valid_user(token):
+    found =[]
+    for each in users_and_tokens:
+        if each[1]==token:
+            found = each
+            return found
+    if found==[]:
+        return False
 
 async def s3_upload(contents: bytes, key: str, folder: str):
     s3_client = boto3.client('s3',
@@ -91,32 +88,27 @@ def check_s3_connection():
         return False
     
 def check_exists(file_md5):
-    if file_details==[]:
+    found = []
+    try:
+        for each in file_details:
+            if each["md5"] == file_md5:
+                found = each
+    except:
+        return False
+    
+    if found==[]:
         return False
     else:
-        for each in file_details:
-            each["md5"] == file_md5
-            return True
-        
-
-@app.post('/check_connection')
-async def see_details_connection():
-    return(check_s3_connection())
+        return found
 
 @app.post('/upload')
-async def upload(file: UploadFile):
-    if token != "": 
-        decoded_token = decode_token(token)
-        current_user = decoded_token.get("sub")
-        if current_user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
-            )
-    else:
+async def upload(token: str, file: UploadFile):
+
+    user_details = check_valid_user(token)
+    if user_details==False:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Operation is not authorized"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Operation not authorised'
         )
     
     if not file:
@@ -134,40 +126,51 @@ async def upload(file: UploadFile):
             detail='Unsupported file type'
         )
     result = str((hashlib.md5(contents)).digest())
-    if check_exists(result) == True:
-        return {"details": "file already exists"}
-    else:
+    found = check_exists(result)
+    if found == False:
         unique_identifier = uuid4()
-        file_name = f'{unique_identifier}.{supported_file_types[file_type]}'
+        file_name = file.filename
         await s3_upload(contents=contents, key=file_name, folder='raw_pdf_files/')
         s3_location = "s3://" + AWS_Bucket + "/" + "raw_pdf_files/"+file_name
         details = {
-            "user_name": current_user,
+            "_id": str(datetime.utcnow()),
+            "user": user_details[0],
             "file_name": file.filename,
-            "unique_identifier": unique_identifier,
-            "md5": result
+            "unique_identifier": str(unique_identifier),
+            "md5": result,
+            "location": s3_location,
+            "status": "queued"
         }
         file_details.append(details)
-        return {'s3 location': s3_location, "md5": result}
+        client = pymongo.MongoClient(mongo_url,tlsCAFile=certifi.where())
+        try:
+            conn = client.server_info()
+            print(f'Connected to MongoDB {conn.get("version")}')
+        except Exception:
+            print("Unable to connect to the MongoDB server.")
+
+        db = client['BigDataAssignment4']
+        user_files = db.user_files
+        temp=[]
+        temp.append(details)
+        user_files.insert_many(temp)
+        return details
+    else:
+        return found
 
 
 AIRFLOW_API_BASE_URL = "http://airflow-server:8080/api/v1"
 
 @app.post('trigger_airflow')
-async def trigger_dag(s3_location: str):
-    if token != "": 
-        decoded_token = decode_token(token)
-        current_user = decoded_token.get("sub")
-        if current_user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token"
-            )
-    else:
+async def trigger_dag(token: str, s3_location: str):
+
+    user_details = check_valid_user(token)
+    if user_details==False:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Operation is not authorized"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Operation not authorised'
         )
+    
     endpoint = f"{AIRFLOW_API_BASE_URL}/dags/dagRuns"
     data = {
         "conf": {"s3_location": s3_location}, 
@@ -178,4 +181,20 @@ async def trigger_dag(s3_location: str):
         return {"message": "DAG triggered successfully"}
     else:
         return {"error": "Failed to trigger DAG"}
+
+@app.post('/status_of_uploaded_file')
+async def status_check(token):
+    user_docs = []
+    user_details = check_valid_user(token)
+    if user_details==False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Operation not authorised'
+        )   
+    else:
+        for each in file_details:
+            each['status'] = "queued" # logic to hit airflow 
+            if user_details[0] == each['user']:
+                user_docs.append(each)
+    return user_docs
     
