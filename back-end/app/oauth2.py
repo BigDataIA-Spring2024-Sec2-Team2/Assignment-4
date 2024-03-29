@@ -7,6 +7,13 @@ from bson.objectid import ObjectId
 from serializers.userSerializers import userEntity
 from database import User
 
+
+
+# Read configuration file
+import configparser
+
+config = configparser.ConfigParser()
+config.read('configuration.properties') 
 # Handles settings related to JWT
 class Settings(BaseModel):
     authjwt_algorithm: str = 'RS256'
