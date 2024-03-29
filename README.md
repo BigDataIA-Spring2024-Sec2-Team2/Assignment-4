@@ -3,30 +3,111 @@
 ## Live application Links
 [![codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1YvvKu38ZeIrlWY-Pgls1Gwes7ZaCuarZ1gx1VVb-qKI#0)
 
-
-## Problem Statement
-
+## Problem Statement 
+Build an end-to-end pipeline using Airflow to automate the data extraction and storing of content of pdf files into Snowflake
+ 
+## Project Goals
+Build an API services using Fast API for getting input file and trigger airflow pipeline, and another one is to retrieve data from snowflake.
+Develop an end-to-end pipeline for automated extraction and loading of PDF metadata into Snowflake via Airflow, Create a user-friendly Streamlit interface.
+Dockerize API services and streamlit application.
 
 ## Technologies Used
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/)
+[![FastAPI](https://img.shields.io/badge/fastapi-109989?style=for-the-badge&logo=FASTAPI&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Amazon AWS](https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/)
 [![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)](https://www.python.org/)
-[![GROBID](https://img.shields.io/badge/GROBID-FFFFFF?style=for-the-badge&logo=GROBID&logoColor=black)](https://grobid.readthedocs.io/en/latest/Introduction/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
-[![Snowflake](https://img.shields.io/badge/snowflake-0000FF?style=for-the-badge&logo=snowflake&logoColor=white)](https://docs.snowflake.com/ )
+[![Apache Airflow](https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://airflow.apache.org/)
+[![Docker](https://img.shields.io/badge/Docker-%232496ED?style=for-the-badge&logo=Docker&color=blue&logoColor=white)](https://www.docker.com)
+[![Google Cloud](https://img.shields.io/badge/Google_Cloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)](https://cloud.google.com)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%234169E1?style=for-the-badge&logo=MongoDB&logoColor=%234169E1&color=black)](https://www.postgresql.org)
+[![Snowflake](https://img.shields.io/badge/snowflake-%234285F4?style=for-the-badge&logo=snowflake&link=https%3A%2F%2Fwww.snowflake.com%2Fen%2F%3F_ga%3D2.41504805.669293969.1706151075-1146686108.1701841103%26_gac%3D1.160808527.1706151104.Cj0KCQiAh8OtBhCQARIsAIkWb68j5NxT6lqmHVbaGdzQYNSz7U0cfRCs-STjxZtgPcZEV-2Vs2-j8HMaAqPsEALw_wcB&logoColor=white)
+](https://www.snowflake.com/en/?_ga=2.41504805.669293969.1706151075-1146686108.1701841103&_gac=1.160808527.1706151104.Cj0KCQiAh8OtBhCQARIsAIkWb68j5NxT6lqmHVbaGdzQYNSz7U0cfRCs-STjxZtgPcZEV-2Vs2-j8HMaAqPsEALw_wcB)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io/)
 
 ## Pre requisites
 1. Python Knowledge
 2. Snowflake Account
-3. Mongo DB Account
-4. AWS Account
+3. AWS S3 bucket
+4. Docker Desktop
+5. FastaAPI knowledge
+6. MongoDB database knowledge
+7. Postman knowledge
+8. Stremlit implementation
+9. Airflow pipeline knowledge
+10. Google Cloud Platform account and hosting knowledge
 
 ## Project Structure
-
+```
+📦 
+├─ .gitignore
+├─ README.md
+├─ airflow
+│  ├─ Dockerfile
+│  ├─ dags
+│  │  ├─ pdf_dags.py
+│  │  └─ scripts
+│  │     ├─ extraction_pypdf.py
+│  │     ├─ load_data.py
+│  │     ├─ models
+│  │     │  └─ pdf_model.py
+│  │     └─ validate.py
+│  ├─ db
+│  │  └─ airflow.db
+│  ├─ docker-compose.yaml
+│  ├─ grobid
+│  │  ├─ config.json
+│  │  ├─ grobid_extraction.py
+│  │  └─ requirements.txt
+│  └─ requirements.txt
+├─ back-end
+│  ├─ api_1
+│  │  ├─ Dockerfile
+│  │  ├─ api_1.py
+│  │  ├─ docker-compose.yaml
+│  │  ├─ env
+│  │  ├─ gitignore
+│  │  ├─ m_database.py
+│  │  └─ requirements.txt
+│  ├─ api_2
+│  │  ├─ Dockerfile
+│  │  ├─ api2.py
+│  │  ├─ docker-compose.yaml
+│  │  ├─ m_database.py
+│  │  ├─ mongo_extracted_data.py
+│  │  ├─ requirements.txt
+│  │  └─ snowflake_helper.py
+│  └─ app
+│     ├─ Dockerfile
+│     ├─ database.py
+│     ├─ docker-compose.yaml
+│     ├─ main.py
+│     ├─ oauth2.py
+│     ├─ requirements.txt
+│     ├─ routers
+│     │  └─ auth.py
+│     ├─ schemas.py
+│     ├─ serializers
+│     │  └─ userSerializers.py
+│     └─ utils.py
+└─ front-end
+   ├─ requirements.txt
+   └─ src
+      ├─ main.py
+      └─ pages
+         ├─ account
+         │  └─ account.py
+         ├─ auth_pages
+         │  ├─ auth_page.py
+         │  ├─ login.py
+         │  └─ signup.py
+         ├─ navbar
+         │  └─ navigation.py
+         └─ upload
+            └─ file_upload.py
+```
 ©generated by [Project Tree Generator](https://woochanleee.github.io/project-tree-generator)
 
 ## How to run Application locally 
-
 
 ## Project run outline
 
@@ -48,6 +129,6 @@ CodeLab - [Documentation](https://docs.google.com/document/d/1YvvKu38ZeIrlWY-Pgl
   
   Name | Contribution %| Contributions |
   --- |--- | --- |
-  Anshul Chaudhary  | % | Streamlit, Airflow Pipelines, Integration|
-  Agash Uthayasuriyan | % | User Authorization, Api2|
-  Narayani Arun Patil | % | Api1, Grobid Extraction|
+  Anshul Chaudhary  | 35% | Streamlit, Airflow, Hosting, Docker|
+  Agash Uthayasuriyan | 32% | API_1, Data extraction, Docker|
+  Narayani Arun Patil | 33% | API_2, Authentication service, MongoDB setup, Docker|
