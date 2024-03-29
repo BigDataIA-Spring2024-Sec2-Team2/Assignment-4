@@ -183,7 +183,7 @@ def process_pdf(s3_uri):
 
   s3_client.upload_fileobj(csv_buffer_encode, bucket, s3_key)
   
-  s3_uri_csv = "s3://" + bucket + s3_key
+  s3_uri_csv = "s3://" + bucket + "/" + s3_key
   
   print("Successfully loaded csv to S3")
   

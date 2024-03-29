@@ -4,7 +4,7 @@ from dags.scripts.models.pdf_model import PDFDataModel
 import re
 import configparser
 import boto3
-from io import BytesIO
+from io import BytesIO, StringIO
 import pandas as pd
 
 config = configparser.ConfigParser()
@@ -86,6 +86,7 @@ def cleanDataPDF(s3_uri):
   
   bucket, key_s3 = split_s3_bucket_key(s3_uri)
   
+  print(bucket, key_s3)
   response = s3_client.get_object(Bucket=bucket, Key=key_s3)
 
   object_content = response['Body'].read()
@@ -114,8 +115,8 @@ def cleanDataPDF(s3_uri):
   
   s3_client.upload_fileobj(csv_buffer_encode, bucket, s3_key)
   
-  s3_uri_csv = "s3://" + bucket + s3_key
+  file_name = str(key_s3.split("/")[1])
   print("------- Ending Writing to CSV -------")
   
   print("------- Ending validation -------")
-  return s3_uri_csv
+  return file_name

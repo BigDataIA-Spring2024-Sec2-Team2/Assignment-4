@@ -6,6 +6,7 @@ from airflow.utils.dates import days_ago
 from datetime import timedelta
 from dags.scripts.extraction_pypdf import process_pdf
 from dags.scripts.validate import cleanDataPDF
+from dags.scripts.load_data import loadData
 
 dag = DAG(
     dag_id="pdf_dag",
@@ -22,14 +23,13 @@ def extract_data(**kwargs):
 
 def validate_data(**kwargs):
     pulled_value = kwargs['ti'].xcom_pull(dag_id='pdf_dag', task_ids='extract_data', key='raw_data_pdf')
-    print(pulled_value)
-    csv_s3_uri = cleanDataPDF(pulled_value)
-    kwargs['ti'].xcom_push(key='clean_data_pdf', value=csv_s3_uri)
+    file_name = cleanDataPDF(pulled_value)
+    kwargs['ti'].xcom_push(key='clean_data_pdf', value=file_name)
     
 
 def load_data(**kwargs):
     pulled_value = kwargs['ti'].xcom_pull(dag_id='pdf_dag', task_ids='validate_data', key='clean_data_pdf')
-    print(pulled_value)
+    loadData(pulled_value)
 
 with dag:
     extract_data_task = PythonOperator(
