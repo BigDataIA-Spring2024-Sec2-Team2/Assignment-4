@@ -62,10 +62,6 @@ async def login_for_access_token(username: str, password: str):
     user_name = username
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/see")
-async def see():
-    return [os.getenv("SECRET_KEY"), os.getenv("aws_access_key_id"), os.getenv("aws_secret_access_key")]
-
 AWS_Bucket = 'file-storage-assignment-4'
 s3 = boto3.resource('s3')
 bucket = s3.Bucket(AWS_Bucket)
@@ -102,9 +98,6 @@ def check_exists(file_md5):
             each["md5"] == file_md5
             return True
         
-@app.post('/see_details')
-async def see_details():
-    return(file_details)
 
 @app.post('/check_connection')
 async def see_details_connection():
