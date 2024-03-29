@@ -12,6 +12,7 @@ def view():
   }
   response = requests.post(url, headers=headers, data=json_data)
   if response.status_code == 200:
-    st.wtite("hi")
+    df = pd.DataFrame(response.json())
+    st.write(df)
   else:
-    st.write("bye")
+    st.error("Invalid Token - login again")
