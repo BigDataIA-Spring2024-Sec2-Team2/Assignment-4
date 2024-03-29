@@ -111,27 +111,27 @@ Dockerize API services and streamlit application.
 1. Clone repository
 2. Go to path each folder where requirementss.txt is present.
 3. Create configurations.example files where requirements is present and add your respsctive creadentials for
-   AWS S3 bucket:
-   Access key = ""
-   Secret Key = ""
-   Bucket = ""
+   - AWS S3 bucket:
+     Access key = "",
+     Secret Key = "",
+     Bucket = ""
  
-   MongoDB:
-   mongo-username= ""
-   mongo-password = "'
-   mongo-cluster = "'
+   - MongoDB:
+     mongo-username= "",
+     mongo-password = "",
+     mongo-cluster = ""
  
-   Snowflake:
-   user = ""
-   password = ""
-   account = ""
-   warehouse = ""
-   database = ""
-   schema = ""
+   - Snowflake:
+     user = "",
+     password = "",
+     account = "",
+     warehouse = "",
+     database = "",
+     schema = ""
  
-   # Airflow
-  airflow_un = ""
-  airflow_pas = ""
+  - Airflow:
+    airflow_un = "",
+    airflow_pas = ""
 5. Create code env and activate it.
 6. run pip install -r requirements.txt
 7. Since each service is dockerised, just run docker compose up --build
