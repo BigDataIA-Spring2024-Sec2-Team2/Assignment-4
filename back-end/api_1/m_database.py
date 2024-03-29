@@ -20,8 +20,7 @@ try:
     print(f'Connected to MongoDB {conn.get("version")}')
 except Exception:
     print("Unable to connect to the MongoDB server.")
-
 db = client['BigDataAssignment4']
-
+ 
 User_token = db.user_tokens
 User_token.create_index([("email", pymongo.ASCENDING)], unique=True)
