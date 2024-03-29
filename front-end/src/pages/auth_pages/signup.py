@@ -1,5 +1,7 @@
 import streamlit as st
 import re
+import requests
+import json
 
 def sign_up():
   with st.form(key='signup', clear_on_submit=True):
@@ -15,8 +17,27 @@ def sign_up():
 
     if sub:
       if validate_email(email) and validate_username(username) and validate_password(password1, password2):
-        # TODO call the create new user service
-        pass
+        url = 'http://34.23.189.28:8080/api/auth/register'
+        # Data to be sent with the POST request (as a dictionary)
+        payload = {
+          "email": email,
+          "password": password1,
+          "role":"user",
+          "name": username,
+          "passwordConfirm": password2
+        }
+        # Convert the data dictionary to JSON
+        json_data = json.dumps(payload)
+        # Making the POST request
+        headers = {
+          'Content-Type': 'application/json',  # Example header, adjust as needed
+        }
+        response = requests.post(url, headers=headers, data=json_data)
+        print(response.status_code)
+        if response.status_code == 201:
+          st.success("User Registered!")
+        else: 
+          st.error("Error Try Again")
 
 def validate_email(email):
   # Regular expression for email validation

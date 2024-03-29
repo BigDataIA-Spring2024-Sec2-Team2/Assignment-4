@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from pages.upload.file_upload import file_uploader
+from pages.account.account import account
 
 def tabs():
   if st.session_state["role"] == "Admin":
@@ -25,6 +26,6 @@ def tabs():
   elif st.session_state["nav_menu"] == "View":
     st.write("v")
   elif st.session_state["nav_menu"] == "Account":
-    st.write("A")
+    account()
   elif st.session_state["nav_menu"] == "Manage":
     st.write("M")

@@ -11,5 +11,3 @@ if not st.session_state["auth_status"]:
   menu_login()
 else:
   tabs()
-
-st.session_state
