@@ -6,6 +6,7 @@
 - Authentication Service: https://34.23.189.28:8000
 - Fast API_1: https://34.23.189.28:8000
 - Fast API_2: https://34.73.83.102:8001
+- Streamlit Application: https://35.229.36.63:8051
 
 ## Problem Statement 
 Build an end-to-end pipeline using Airflow to automate the data extraction and storing of content of pdf files into Snowflake
