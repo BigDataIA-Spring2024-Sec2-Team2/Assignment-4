@@ -181,8 +181,3 @@ class PDFProcessor:
 
         self.clear_directory(self.output_directory)
         self.clear_directory(self.input_directory)
-
-
-s3_url = "s3://file-storage-assignment-4/raw_pdf_files/2024-l3-topics-combined-2.pdf"
-processor = PDFProcessor(s3_url)
-processor.process_and_generate()
