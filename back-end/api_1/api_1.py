@@ -16,6 +16,7 @@ import pymongo
 import urllib
 import certifi
 from m_database import User_token
+import random 
 
 load_dotenv()
 
@@ -117,7 +118,6 @@ async def upload(token: str, file: UploadFile):
             detail='No file found!'
         )
     contents = await file.read()
-    size = len(contents)
 
     file_type = magic.from_buffer(buffer=contents, mime=True)
     if file_type not in supported_file_types:
@@ -159,24 +159,30 @@ async def upload(token: str, file: UploadFile):
         return found
 
 
-AIRFLOW_API_BASE_URL = "http://airflow-server:8080/api/v1"
+AIRFLOW_API_BASE_URL = "http://34.139.115.254:8080/api/v1"
 
-@app.post('trigger_airflow')
+@app.post('/trigger_airflow')
 async def trigger_dag(token: str, s3_location: str):
-
+    current_time = datetime.now()
     user_details = check_valid_user(token)
     if user_details==False:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Operation not authorised'
         )
-    
-    endpoint = f"{AIRFLOW_API_BASE_URL}/dags/dagRuns"
-    data = {
-        "conf": {"s3_location": s3_location}, 
-        "execution_date": "now"
-    }
-    response = requests.post(endpoint, json=data)
+    endpoint = f"{AIRFLOW_API_BASE_URL}/dags/pdf_dag/dagRuns"
+    username = os.getenv("airflow_un")
+    password = os.getenv("airflow_pas")
+    rand1 = random.randint(1,1000)
+    rand2 = random.randint(1,1000)
+    dag_run_id = str("id_run_" +str(rand1)+str(rand2))
+    response = requests.post(
+        endpoint,
+        auth=(username, password),
+        json={"conf": {"s3_uri": s3_location}, "dag_run_id": dag_run_id},
+        headers={"Content-Type": "application/json"},
+    )
+    print(response.text)
     if response.status_code == 200:
         return {"message": "DAG triggered successfully"}
     else:
