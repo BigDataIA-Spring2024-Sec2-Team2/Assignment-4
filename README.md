@@ -2,6 +2,10 @@
 
 ## Live application Links
 [![codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1YvvKu38ZeIrlWY-Pgls1Gwes7ZaCuarZ1gx1VVb-qKI#0)
+- Airflow: https://34.139.115.254:8080
+- Authentication Service: https://34.23.189.28:8000
+- Fast API_1: https://34.23.189.28:8000
+- Fast API_2: https://34.73.83.102:8001
 
 ## Problem Statement 
 Build an end-to-end pipeline using Airflow to automate the data extraction and storing of content of pdf files into Snowflake
