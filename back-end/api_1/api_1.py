@@ -50,14 +50,13 @@ file_details=[]
 
 app = FastAPI() 
 
-AWS_Bucket = 'file-storage-assignment-4'
-s3 = boto3.resource('s3')
-bucket = s3.Bucket(AWS_Bucket)
-
 supported_file_types={
     'application/pdf': 'pdf'
 }
 
+AWS_Bucket = 'file-storage-assignment-4'
+s3 = boto3.resource('s3')
+bucket = s3.Bucket(AWS_Bucket)
 
 def check_valid_user(token):
     found =[]
