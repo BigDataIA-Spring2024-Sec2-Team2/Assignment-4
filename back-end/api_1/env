@@ -1,5 +1,0 @@
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
-aws_access_key_id= "AKIA6ODU65XVZNHZTLHY"
-aws_secret_access_key= "zy5eOotTahcIPtX+GVbG4GjV8gB/LP0nDrfYCYH1"
-AWS_Bucket = 'file-storage-assignment-4'
